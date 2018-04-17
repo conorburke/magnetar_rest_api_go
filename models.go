@@ -1,7 +1,7 @@
 package main
 
 type user struct {
-	Id           int
+	ID           int
 	FirstName    string
 	LastName     string
 	Email        string
@@ -16,9 +16,9 @@ type user struct {
 }
 
 type tool struct {
-	id        int
-	title     string
-	toolType  string
-	price     float64
-	toolOwner string
+	ID        int
+	Title     string
+	ToolType  string
+	Price     float64
+	ToolOwner int
 }

@@ -11,17 +11,17 @@ func main() {
 	fmt.Printf("server up and running on %s \n", port)
 
 	// u := user{
-	// 	firstName: "Randy",
-	// 	lastName: "Lahey",
-	// 	email: "gutactular@gmail.com",
-	// 	passwordHash: "password",
-	// 	phoneNumber:"123456789",
-	// 	age: 58,
-	// 	address1: "27 Boneventure",
-	// 	address2: "",
-	// 	city: "Sunnyvale",
-	// 	region: "Ontario",
-	// 	zipcode: 12345,
+	// 	FirstName: "Jim",
+	// 	LastName: "Lahey",
+	// 	Email: "theliqour@gmail.com",
+	// 	PasswordHash: "password",
+	// 	PhoneNumber:"123456789",
+	// 	Age: 58,
+	// 	Address1: "27 Boneventure",
+	// 	Address2: "",
+	// 	City: "Sunnyvale",
+	// 	Region: "Ontario",
+	// 	Zipcode: 12345,
 	// }
 
 	// fmt.Println(u)
@@ -29,8 +29,14 @@ func main() {
 	// fmt.Println(u)
 
 	mux := httprouter.New()
-	mux.GET("/test", test)
-	mux.GET("/users", users)
+	mux.GET("/api/test", test)
+	mux.GET("/api/users", getUsers)
+	mux.GET("/api/users/:id", getUser)
+	mux.GET("/api/tools", getTools)
+	mux.GET("/api/tools/:id", getTool)
+	mux.GET("/api/users/:id/tools", getUserTools)
+	//TODO: need to figure out wildcard conflict, want to use users instead of user below
+	mux.GET("/api/user/:userID/tools/:toolID", getUserTool)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:" + port,

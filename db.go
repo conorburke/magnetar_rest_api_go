@@ -16,14 +16,3 @@ func init() {
 		panic(err)
 	}
 }
-
-func (user *user) createUser() (err error) {
-	statement := "insert into users (first_name, last_name, email) values ($1, $2, $3) returning id"
-	stmt, err := Db.Prepare(statement)
-	if err != nil {
-		return
-	}
-	defer stmt.Close()
-	err = stmt.QueryRow(user.FirstName, user.LastName, user.Email).Scan(&user.Id)
-	return
-}
