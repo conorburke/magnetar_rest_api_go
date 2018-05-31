@@ -32,6 +32,26 @@ func selectUser(id int) (u user, err error) {
 	return
 }
 
+func insertUser(u *user) (id int, err error) {
+	statement := "insert into users (first_name, last_name, email, phone_number) values ($1, $2, $3, $4) returning id"
+	stmt, err := Db.Prepare(statement)
+	fmt.Println(stmt)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(u.FirstName, u.LastName, u.Email, u.PhoneNumber).Scan(&u.ID)
+	if err != nil {
+		return
+	}
+	fmt.Println(u.ID)
+	return u.ID, err
+}
+
+func destroyTool(id int) {
+	Db.QueryRow(`delete from tools where id = $1`, id)
+}
+
 func (user *user) createUser() (err error) {
 	statement := "insert into users (first_name, last_name, email) values ($1, $2, $3) returning id"
 	stmt, err := Db.Prepare(statement)
