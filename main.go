@@ -37,6 +37,8 @@ func main() {
 	mux.GET("/api/users/:id/tools", getUserTools)
 	//TODO: need to figure out wildcard conflict, want to use users instead of user below
 	mux.GET("/api/user/:userID/tools/:toolID", getUserTool)
+	mux.DELETE("/api/tools/:id", deleteTool)
+	mux.POST("/api/users", createUser)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:" + port,

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io/ioutil"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -43,6 +45,54 @@ func getUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	os.Stdout.Write(js)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func createUser(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	os.Stdout.Write(body)
+
+	var u user
+
+	err2 := json.Unmarshal(body, &u)
+
+	if err2 != nil {
+		panic(err2)
+	}
+
+	log.Println(u.FirstName)
+
+	id, err3 := insertUser(&u)
+
+	if err3 != nil {
+		panic(err3)
+	}
+
+	fmt.Println(id)
+
+	user, err := selectUser(id)
+	if err != nil {
+		panic(err)
+	}
+	js, err := json.Marshal(user)
+	if err != nil {
+		panic(err)
+	}
+	os.Stdout.Write(js)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
+}
+
+func deleteTool(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	toolID, err := strconv.Atoi(p.ByName("id"))
+	if err != nil {
+		panic(err)
+	}
+	destroyTool(toolID)
 }
 
 func getTools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
