@@ -39,6 +39,7 @@ func main() {
 	mux.GET("/api/user/:userID/tools/:toolID", getUserTool)
 	mux.DELETE("/api/tools/:id", deleteTool)
 	mux.POST("/api/users", createUser)
+	mux.POST("/api/tools", createTool)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:" + port,
