@@ -47,6 +47,32 @@ func getUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Write(js)
 }
 
+func createTool(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	os.Stdout.Write(body)
+
+	var t tool
+
+	err2 := json.Unmarshal(body, &t)
+
+	if err2 != nil {
+		panic(err2)
+	}
+
+	id, err3 := insertTool(&t)
+
+	if err3 != nil {
+		panic(err3)
+	}
+
+	fmt.Println(id)
+}
+
+
 func createUser(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -109,16 +135,24 @@ func getTools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Write(js)
 }
 
+type combined struct {
+	tool
+	user
+}
+
 func getTool(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	toolID, err := strconv.Atoi(p.ByName("id"))
 	if err != nil {
 		panic(err)
 	}
-	t, err := selectUser(toolID)
+	t, u, err := selectTool(toolID)
+
 	if err != nil {
 		panic(err)
 	}
-	js, err := json.Marshal(t)
+	c := combined{t,u}
+
+	js, err := json.Marshal(c)
 	if err != nil {
 		panic(err)
 	}

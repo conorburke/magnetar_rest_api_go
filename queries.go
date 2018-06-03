@@ -32,6 +32,23 @@ func selectUser(id int) (u user, err error) {
 	return
 }
 
+func insertTool(t *tool) (id int, err error) {
+	statement := "insert into tools (title, tool_type, price, tool_owner) values ($1, $2, $3, $4) returning id"
+	stmt, err := Db.Prepare(statement)
+	fmt.Println(stmt)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(t.Title, t.ToolType, t.Price, t.ToolOwner).Scan(&t.ID)
+	if err != nil {
+		return
+	}
+	fmt.Println(t.ID)
+	return t.ID, err
+}
+
+
 func insertUser(u *user) (id int, err error) {
 	statement := "insert into users (first_name, last_name, email, phone_number) values ($1, $2, $3, $4) returning id"
 	stmt, err := Db.Prepare(statement)
@@ -82,10 +99,16 @@ func selectTools() (tools []tool, err error) {
 	return
 }
 
-func selectTool(id int) (t tool, err error) {
+func selectTool(id int) (t tool, u user, err error) {
 	t = tool{}
-	err = Db.QueryRow(`select * from tools where id = $1`, id).
-		Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner)
+	u = user{}
+	err = Db.QueryRow(`select t.id as tool_id, t.title, t.tool_type, t.price, t.tool_owner, 
+		u.first_name, u.last_name, u.email, u.password_hash, u.phone_number,
+		u.age, u.address_1, u.address_2, u.city, u.region, u.zipcode
+		from tools t join users u on t.tool_owner = u.id where t.id = $1`, id).
+		Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner, &u.FirstName,
+		&u.LastName, &u.Email, &u.PasswordHash, &u.PhoneNumber, &u.Age, &u.Address1, &u.Address2,
+		&u.City, &u.Region, &u.Zipcode)
 	return
 }
 
