@@ -5,14 +5,15 @@ import (
 )
 
 func selectUsers() (users []user, err error) {
-	rows, err := Db.Query("select * from users")
+	rows, err := Db.Query(`select id, first_name, last_name, email, password_hash,
+		phone_number, address_1, address_2, city, region, zipcode from users`)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		u := user{}
 		err = rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.PasswordHash,
-			&u.PhoneNumber, &u.Age, &u.Address1, &u.Address2, &u.City, &u.Region, &u.Zipcode)
+			&u.PhoneNumber, &u.Address1, &u.Address2, &u.City, &u.Region, &u.Zipcode)
 		if err != nil {
 			return
 		}
@@ -26,26 +27,49 @@ func selectUsers() (users []user, err error) {
 
 func selectUser(id int) (u user, err error) {
 	u = user{}
-	err = Db.QueryRow(`select * from users where id = $1`, id).
+	err = Db.QueryRow(`select id, first_name, last_name, email, password_hash,
+		  phone_number, address_1, address_2, city, region, zipcode from users where id = $1`, id).
 		Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.PasswordHash,
-		&u.PhoneNumber, &u.Age, &u.Address1, &u.Address2, &u.City, &u.Region, &u.Zipcode)
+		&u.PhoneNumber, &u.Address1, &u.Address2, &u.City, &u.Region, &u.Zipcode)
 	return
 }
 
 func insertTool(t *tool) (id int, err error) {
-	statement := "insert into tools (title, tool_type, price, tool_owner) values ($1, $2, $3, $4) returning id"
+	statement := "insert into tools (title, category, price, tool_owner) values ($1, $2, $3, $4) returning id"
 	stmt, err := Db.Prepare(statement)
 	fmt.Println(stmt)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(t.Title, t.ToolType, t.Price, t.ToolOwner).Scan(&t.ID)
+	err = stmt.QueryRow(t.Title, t.Category, t.Price, t.ToolOwner).Scan(&t.ID)
 	if err != nil {
 		return
 	}
 	fmt.Println(t.ID)
 	return t.ID, err
+}
+
+func rentToolUpdate(t *tool) {
+	// Db.QueryRow(`update tools set available = false where id = $1`, id)
+	Db.QueryRow(`update tools set start_date = $2, end_date = $3 where id = $1`, t.ID, t.StartDate, t.EndDate)
+	// fmt.Println(t.EndDate)
+	// fmt.Println(t.Title)
+	// fmt.Println(t.ID)
+	// fmt.Println(t.StartDate)
+  // statement := "update tools set available = false, start_date = $2, end_date = $3 where id = $1"
+	// stmt, err := Db.Prepare(statement)
+	// fmt.Println(stmt)
+	// if err != nil {
+	// 	return
+	// }
+	// defer stmt.Close()
+	// err = stmt.QueryRow(t.ID, t.StartDate, t.EndDate).Scan(&t.ID)
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Println(t.ID)
+	// return err
 }
 
 
@@ -80,46 +104,50 @@ func (user *user) createUser() (err error) {
 	return
 }
 
-func selectTools() (tools []tool, err error) {
-	rows, err := Db.Query("select * from tools")
+func selectTools() (toolOwners []toolOwner, err error) {
+	rows, err := Db.Query(`select t.id as tool_id, t.title, t.category, t.price, t.tool_owner, 
+		u.first_name, u.last_name, u.email, u.password_hash, u.phone_number,
+		u.address_1, u.address_2, u.city, u.region, u.zipcode
+		from tools t join users u on t.tool_owner = u.id`)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
-		t := tool{}
-		err = rows.Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner)
+		to := toolOwner{}
+		err = rows.Scan(&to.ID, &to.Title, &to.Category, &to.Price, &to.ToolOwner,
+			&to.FirstName, &to.LastName, &to.Email, &to.PasswordHash, &to.PhoneNumber, 
+			&to.Address1, &to.Address2,
+			&to.City, &to.Region, &to.Zipcode)
 		if err != nil {
 			return
 		}
-		fmt.Println(t)
-		tools = append(tools, t)
-		fmt.Println(tools)
+		fmt.Println(to)
+		toolOwners = append(toolOwners, to)
+		fmt.Println(toolOwners)
 	}
 	rows.Close()
 	return
 }
 
-func selectTool(id int) (t tool, u user, err error) {
-	t = tool{}
-	u = user{}
-	err = Db.QueryRow(`select t.id as tool_id, t.title, t.tool_type, t.price, t.tool_owner, 
+func selectTool(id int) (to toolOwner, err error) {
+	err = Db.QueryRow(`select t.id as tool_id, t.title, t.category, t.price, t.tool_owner, 
 		u.first_name, u.last_name, u.email, u.password_hash, u.phone_number,
-		u.age, u.address_1, u.address_2, u.city, u.region, u.zipcode
+	  u.address_1, u.address_2, u.city, u.region, u.zipcode
 		from tools t join users u on t.tool_owner = u.id where t.id = $1`, id).
-		Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner, &u.FirstName,
-		&u.LastName, &u.Email, &u.PasswordHash, &u.PhoneNumber, &u.Age, &u.Address1, &u.Address2,
-		&u.City, &u.Region, &u.Zipcode)
+		Scan(&to.ID, &to.Title, &to.Category, &to.Price, &to.ToolOwner, &to.FirstName,
+		&to.LastName, &to.Email, &to.PasswordHash, &to.PhoneNumber, &to.Address1, &to.Address2,
+		&to.City, &to.Region, &to.Zipcode)
 	return
 }
 
 func selectUserTools(id int) (tools []tool, err error) {
-	rows, err := Db.Query("select * from tools where tool_owner = $1", id)
+	rows, err := Db.Query("select id, title, category, price, tool_owner from tools where tool_owner = $1", id)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		t := tool{}
-		err = rows.Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner)
+		err = rows.Scan(&t.ID, &t.Title, &t.Category, &t.Price, &t.ToolOwner)
 		if err != nil {
 			return
 		}
@@ -133,7 +161,7 @@ func selectUserTools(id int) (tools []tool, err error) {
 
 func selectUserTool(uID int, tID int) (t tool, err error) {
 	t = tool{}
-	err = Db.QueryRow(`select * from tools where tool_owner = $1 and id = $2`, uID, tID).
-		Scan(&t.ID, &t.Title, &t.ToolType, &t.Price, &t.ToolOwner)
+	err = Db.QueryRow(`select id, title, category, price, tool_owner from tools where tool_owner = $1 and id = $2`, uID, tID).
+		Scan(&t.ID, &t.Title, &t.Category, &t.Price, &t.ToolOwner)
 	return
 }

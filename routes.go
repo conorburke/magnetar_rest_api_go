@@ -57,19 +57,50 @@ func createTool(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
 
 	var t tool
 
-	err2 := json.Unmarshal(body, &t)
+	err = json.Unmarshal(body, &t)
 
-	if err2 != nil {
-		panic(err2)
+	if err != nil {
+		panic(err)
 	}
 
-	id, err3 := insertTool(&t)
+	id, err := insertTool(&t)
 
-	if err3 != nil {
-		panic(err3)
+	if err != nil {
+		panic(err)
 	}
 
 	fmt.Println(id)
+}
+
+func rentTool(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
+	// toolID, err := strconv.Atoi(p.ByName("id"))
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// rentToolUpdate(toolID)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	os.Stdout.Write(body)
+
+	var t tool
+
+	err = json.Unmarshal(body, &t)
+
+	if err != nil {
+		panic(err)
+	}
+
+	// err = rentToolUpdate(&t)
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	rentToolUpdate(&t)
 }
 
 
@@ -83,18 +114,18 @@ func createUser(w http.ResponseWriter, r * http.Request, p httprouter.Params) {
 
 	var u user
 
-	err2 := json.Unmarshal(body, &u)
+	err = json.Unmarshal(body, &u)
 
-	if err2 != nil {
-		panic(err2)
+	if err != nil {
+		panic(err)
 	}
 
 	log.Println(u.FirstName)
 
-	id, err3 := insertUser(&u)
+	id, err := insertUser(&u)
 
-	if err3 != nil {
-		panic(err3)
+	if err != nil {
+		panic(err)
 	}
 
 	fmt.Println(id)
@@ -122,11 +153,11 @@ func deleteTool(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func getTools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	tools, err := selectTools()
+	toolOwners, err := selectTools()
 	if err != nil {
 		panic(err)
 	}
-	js, err := json.Marshal(tools)
+	js, err := json.Marshal(toolOwners)
 	if err != nil {
 		panic(err)
 	}
@@ -135,24 +166,18 @@ func getTools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Write(js)
 }
 
-type combined struct {
-	tool
-	user
-}
-
 func getTool(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	toolID, err := strconv.Atoi(p.ByName("id"))
 	if err != nil {
 		panic(err)
 	}
-	t, u, err := selectTool(toolID)
+	toolOwner, err := selectTool(toolID)
 
 	if err != nil {
 		panic(err)
 	}
-	c := combined{t,u}
 
-	js, err := json.Marshal(c)
+	js, err := json.Marshal(toolOwner)
 	if err != nil {
 		panic(err)
 	}
