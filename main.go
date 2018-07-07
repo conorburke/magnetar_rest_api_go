@@ -40,6 +40,7 @@ func main() {
 	mux.DELETE("/api/tools/:id", deleteTool)
 	mux.POST("/api/users", createUser)
 	mux.POST("/api/tools", createTool)
+	mux.POST("/api/rent/:id", rentTool)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:" + port,

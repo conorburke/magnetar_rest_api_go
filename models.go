@@ -7,18 +7,39 @@ type user struct {
 	Email        string
 	PasswordHash string
 	PhoneNumber  string
-	Age          int
 	Address1     string
 	Address2     string
 	City         string
 	Region       string
-	Zipcode      int
+	Zipcode      string
 }
 
 type tool struct {
 	ID        int
 	Title     string
-	ToolType  string
+	Category  string
 	Price     float64
 	ToolOwner int
+	StartDate float64
+	EndDate   float64
+}
+
+type toolOwner struct {
+	ID        	 int
+	Title     	 string
+	Category  	 string
+	Price     	 float64
+	ToolOwner 	 int
+	StartDate    float64
+	EndDate      float64
+	FirstName    string
+	LastName     string
+	Email        string
+	PasswordHash string
+	PhoneNumber  string
+	Address1     string
+	Address2     string
+	City         string
+	Region       string
+	Zipcode      int
 }
